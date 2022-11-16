@@ -4,8 +4,8 @@ import pathlib
 from model import MattingNetwork
 from inference import convert_video
 
-torch.cuda.empty_cache()
-if torch.cuda.is_available():
+if torch.cuda.is_available():  # because Mac!
+    torch.cuda.empty_cache()
     model = MattingNetwork('mobilenetv3').eval().cuda()  # or "resnet50"
 else:
     model = MattingNetwork('mobilenetv3').eval()
@@ -16,9 +16,7 @@ timeStamp = int((time.time()) / 36000)  # timestamp of date of creation
 
 x = pathlib.PurePath(input('DeMatt: enter the location of the thing that you want DeMatted:'))
 fileName = pathlib.PurePath(x).stem
-print(fileName)
-# x2 = str(x).strip
-
+# print(fileName)
 x2 = pathlib.PurePath(str(x).strip('\"\"'))  # input expects strings in a specific format
 y = pathlib.Path(x2.parent, fileName + '_RVM_' + str(timeStamp))  # make a unique folder
 y.mkdir(exist_ok=True)

@@ -1,21 +1,26 @@
 import torch
 import pathlib
-torch.cuda.empty_cache()
-
 from model import MattingNetwork
-
-model = MattingNetwork('mobilenetv3').eval().cuda()  # or "resnet50"
-model.load_state_dict(torch.load('rvm_mobilenetv3.pth'))
 from inference import convert_video
 
-#x = pathlib.Path(r'C:\Users\bgenc\Desktop\compOut.mp4')
+torch.cuda.empty_cache()
+if torch.cuda.is_available():
+    model = MattingNetwork('mobilenetv3').eval().cuda()  # or "resnet50"
+else:
+    model = MattingNetwork('mobilenetv3').eval()
+
+model.load_state_dict(torch.load('rvm_mobilenetv3.pth'))
+
+
+# "H:\Other computers\My MacBook Air\Movies\benVideoArtProjects\fGroundSuicide.mp4"
+# x = pathlib.Path(r'C:\Users\bgenc\Desktop\compOut.mp4')
 
 x = pathlib.PurePath(input('enter the thing '))
 fileName = pathlib.PurePath(x).stem
 print(fileName)
-#x2 = str(x).strip
+# x2 = str(x).strip
 x2 = pathlib.PurePath(str(x).strip('\"\"'))
-y = pathlib.Path(x2.parent, 'fart')
+y = pathlib.Path(x2.parent, 'fart' + 'test')
 y.mkdir(exist_ok=True)
 
 print(x2)
@@ -35,20 +40,28 @@ while a != 1:
     else:
         print('we are all busy here: PNG OR VIDEO')
 
-print('your source is', x3)
+compFolder = pathlib.Path(y, fileName + 'compOut')
+foregroundFolder = pathlib.Path(y, fileName + 'fGround')
+alphaTypeFolder = pathlib.Path(y, fileName + 'alphaFolder')
 
-if outputType =='png_sequence':
-    comp = 'compOut'
-    foreground = 'fGround'
-    alphaType = 'alphaFolder'
+alphaTypeFolder.mkdir(exist_ok=True)
+compFolder.mkdir(exist_ok=True)
+foregroundFolder.mkdir(exist_ok=True)
+
+if outputType != 'png_sequence':
+    alphaType = str(alphaTypeFolder) + '/' + 'alpha.mp4'
+    comp = str(compFolder) + '/' + 'compout.mp4'
+    foreground = str(foregroundFolder) + '/' + 'fg.mp4'
 else:
-    alphaType = 'alpha.mp4'
-    comp = 'compOut.mp4'
-    foreground = 'fGround.mp4'
+    alphaType = str(alphaTypeFolder)
+    foreground = str(foregroundFolder)
+    comp = str(compFolder)
+
+print(foreground)
 
 convert_video(
     model,  # The model, can be on any device (cpu or cuda).
-    input_source=x3,  # A video file or an image sequence directory.
+    input_source=str(x2),  # A video file or an image sequence directory.
     output_type=outputType,  # Choose "video" or "png_sequence"
     output_composition=comp,  # File path if video; directory path if png sequence.
     output_alpha=alphaType,  # [Optional] Output the raw alpha prediction.

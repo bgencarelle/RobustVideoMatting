@@ -1,3 +1,4 @@
+import time
 import torch
 import pathlib
 from model import MattingNetwork
@@ -11,25 +12,25 @@ else:
 
 model.load_state_dict(torch.load('rvm_mobilenetv3.pth'))
 
+timeStamp = int((time.time()) / 36000)  # timestamp of date of creation
 
-# "H:\Other computers\My MacBook Air\Movies\benVideoArtProjects\fGroundSuicide.mp4"
-# x = pathlib.Path(r'C:\Users\bgenc\Desktop\compOut.mp4')
-
-x = pathlib.PurePath(input('enter the thing '))
+x = pathlib.PurePath(input('DeMatt: enter the location of the thing that you want DeMatted:'))
 fileName = pathlib.PurePath(x).stem
 print(fileName)
 # x2 = str(x).strip
-x2 = pathlib.PurePath(str(x).strip('\"\"'))
-y = pathlib.Path(x2.parent, 'fart' + 'test')
+
+x2 = pathlib.PurePath(str(x).strip('\"\"'))  # input expects strings in a specific format
+y = pathlib.Path(x2.parent, fileName + '_RVM_' + str(timeStamp))  # make a unique folder
 y.mkdir(exist_ok=True)
 
-print(x2)
-print(y)
+print('your input is ', x2)
+print('your output folder is ', y)
 
 outputType = 'png'
-a = 0
 prompt2 = 'png'
-while a != 1:
+a = 0
+
+while a != 1:  # sanitize inputs cheap and dirty way
     prompt2 = input('png or video')
     if prompt2 == 'png':
         outputType = 'png_sequence'
@@ -41,21 +42,20 @@ while a != 1:
         print('we are all busy here: PNG OR VIDEO')
 
 compFolder = pathlib.Path(y, fileName + 'compOut')
-foregroundFolder = pathlib.Path(y, fileName + 'fGround')
+foregroundFolder = pathlib.Path(y, fileName + 'forGround')
 alphaTypeFolder = pathlib.Path(y, fileName + 'alphaFolder')
 
-alphaTypeFolder.mkdir(exist_ok=True)
-compFolder.mkdir(exist_ok=True)
-foregroundFolder.mkdir(exist_ok=True)
-
 if outputType != 'png_sequence':
-    alphaType = str(alphaTypeFolder) + '/' + 'alpha.mp4'
-    comp = str(compFolder) + '/' + 'compout.mp4'
-    foreground = str(foregroundFolder) + '/' + 'fg.mp4'
+    alphaType = str(y) + '/' + 'alpha.mp4'
+    comp = str(y) + '/' + 'compout.mp4'
+    foreground = str(y) + '/' + 'fg.mp4'
 else:
     alphaType = str(alphaTypeFolder)
     foreground = str(foregroundFolder)
     comp = str(compFolder)
+    alphaTypeFolder.mkdir(exist_ok=True)
+    compFolder.mkdir(exist_ok=True)
+    foregroundFolder.mkdir(exist_ok=True)
 
 print(foreground)
 
@@ -68,5 +68,5 @@ convert_video(
     output_foreground=foreground,  # [Optional] Output the raw foreground prediction.
     output_video_mbps=4,  # Output video mbps. Not needed for png sequence.
     downsample_ratio=None,  # A hyperparameter to adjust or use None for auto.
-    seq_chunk=12,  # Process n frames at once for better parallelism.
+    seq_chunk=15,  # Process n frames at once for better parallelism.
 )
